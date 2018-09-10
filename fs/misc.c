@@ -48,20 +48,14 @@ PUBLIC int search_file(char * path)
 	if (strip_path(filename, path, &dir_inode) != 0)
 		return 0;
 
-	if (filename[0] == 0)	/* path: "/" */
+	if (filename[0] == 0)	
 		return dir_inode->i_num;
 
-	/**
-	 * Search the dir for the file.
-	 */
+
 	int dir_blk0_nr = dir_inode->i_start_sect;
 	int nr_dir_blks = (dir_inode->i_size + SECTOR_SIZE - 1) / SECTOR_SIZE;
 	int nr_dir_entries =
-	  dir_inode->i_size / DIR_ENTRY_SIZE; /**
-					       * including unused slots
-					       * (the file has been deleted
-					       * but the slot is still there)
-					       */
+	  dir_inode->i_size / DIR_ENTRY_SIZE;
 	int m = 0;
 	struct dir_entry * pde;
 	for (i = 0; i < nr_dir_blks; i++) {
@@ -148,6 +142,10 @@ PUBLIC int strip_path(char * filename, const char * pathname,
 					{
 					//	printl("@%s %d", filename,pde->inode_nr);//test
 						father_level = get_inode(father_level->i_dev, pde->inode_nr);
+						if (father_level->i_mode != I_DIRECTORY) {
+							put_inode(father_level);
+							return -1;
+						}
 						//put_inode(father_level);
 						break;
 					}
@@ -160,8 +158,9 @@ PUBLIC int strip_path(char * filename, const char * pathname,
 
 
 			//
-			memset(t, 0, MAX_FILENAME_LEN); //clear the temp filename
 			t = filename;
+			memset(t, 0, MAX_FILENAME_LEN); //clear the temp filename
+			
 			s++;
 
 		}
