@@ -63,6 +63,9 @@ PUBLIC int do_unlink()
 		return -1;
 	printl("@link filename> %s\n", filename);//test
 	printl("@link dirnode> %d\n", dir_inode->i_num);//test
+	if (filename[0] == '.'){				//cant remove . or ..
+		return -1;
+	}
 	struct inode * pin = get_inode(dir_inode->i_dev, inode_nr);
 	milli_delay(6000);
 
